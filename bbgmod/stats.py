@@ -21,12 +21,16 @@ def window(a, w=5, o=1):
         a, strides = st, shape = sh)[0::o].copy()
 
 
-def calc_window_fishers_method(pvals, lag, method='fisher'):
+def calc_window_fishers_method(pvals, lag, method='stouffer'):
     """Compute Fisher's Method over a moving window across a set of p-values
     """
     f_pvals = np.empty(pvals.shape); f_pvals[:] = np.NAN
     result = window(pvals)
-    f_pvals[...,lag:-lag] = [stats.combine_pvalues(i, 'stouffer')[1] for i in result]
+    if method == 'stouffer':
+        f_pvals[...,lag:-lag] = \
+            [stats.combine_pvalues(i, method, [5, 10, 70, 10, 5])[1] for i in result]
+    else:
+        f_pvals[...,lag:-lag] = [stats.combine_pvalues(i, method)[1] for i in result]
     return f_pvals
 
 
